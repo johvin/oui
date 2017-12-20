@@ -1,0 +1,18 @@
+{
+  "name": "oui",
+  "version": "1.0.0",
+  "description": "save oui info to mysql periodly",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node src/index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "johvin",
+  "license": "MIT",
+  "dependencies": {
+    "mysql": "^2.15.0"
+  },
+  "engines": {
+    "node": "^6.10.2"
+  }
+}
