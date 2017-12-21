@@ -40,7 +40,8 @@ const downloadOui = (ouiInfo, cb) => {
       res.setEncoding('utf8');
       res.pipe(ws)
       .on('finish', () => {
-        cb(null, true, res.headers);
+        console.log('ws finish');
+        process.nextTick(cb, null, true, res.headers);
       })
       .on('error', cb);
     } else {
