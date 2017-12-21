@@ -3,7 +3,7 @@ const fs = require('fs');
 const path = require('path');
 const EE = require('events');
 
-module.exports = function readOui(ouiStream) {
+module.exports = function readOuiDataFromFile(ouiStream) {
   if (!(ouiStream instanceof fs.ReadStream) && typeof ouiStream !== 'string') {
     return Promise.reject(new Error('invalid param "ouiStream", a fs.ReadStream instance or a file path is required'));
   }
@@ -76,4 +76,3 @@ module.exports = function readOui(ouiStream) {
       });
   }));
 };
-
