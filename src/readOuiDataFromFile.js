@@ -12,6 +12,8 @@ module.exports = function readOuiDataFromFile(ouiStream) {
   let innerLine = 0;
   let record;
 
+  const privateRe = /^private$/i;
+
   const dealOuiLine = (line) => {
     line = line.trim();
 
@@ -25,6 +27,15 @@ module.exports = function readOuiDataFromFile(ouiStream) {
             addr: {}
           }
         };
+
+        if (privateRe.test(record.org.name)) {
+          record.org.addr.street = '';
+          record.org.addr.provinceCity = '';
+          record.org.addr.country = '';
+          recordList.push(record);
+          record = null;
+          innerLine = 0;
+        }
       }
     } else if (innerLine === 1 && line.startsWith(record.mac)) {
       innerLine = 2;
