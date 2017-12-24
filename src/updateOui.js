@@ -12,13 +12,10 @@ const updateOuiData = ({ etag, lastModified, contentLength, recordList}) => {
       changedRows: 0
     });
   }
-  
+
   const sqlValues = recordList.map((record, index) => {
     const { mac, org: { name, addr } } = record;
     const str = '(' + [mac, name, addr.street, addr.provinceCity, addr.country].map(it => mysql.escape(it)).join(', ') + ')';
-    if (index > 280 && index < 290) {
-      console.log('row', index + 1, str);
-    }
     return str;
   }).join(', ');
 
@@ -44,40 +41,6 @@ const updateOuiData = ({ etag, lastModified, contentLength, recordList}) => {
           };
         })
     });
-
-  // conn.beginTransaction((err1) =>{
-  //   if (err1) {
-  //     return Promise.reject(err1);
-  //   }
-
-  //   conn.query(dataSql, (err2, ret2) => {
-  //     if (err2) {
-  //       return conn.rollback(() => {
-  //         Promise.reject(err2);
-  //       })
-  //     }
-
-  //     conn.query(infoSql, (err3) => {
-  //       if (err3) {
-  //         return conn.rollback(() => {
-  //           Promise.reject(err3);
-  //         })
-  //       }
-  //       conn.commit((err4) => {
-  //         if (err4) {
-  //           return conn.rollback(() => {
-  //             Promise.reject(err4);
-  //           })
-  //         }
-  //         Promise.resolve({
-  //           totalRows: recordList.length,
-  //           affectedRows: ret2.affectedRows,
-  //           changedRows: ret2.changedRows
-  //         });
-  //       });
-  //     });
-  //   });
-  // });
 };
 
 module.exports = updateOuiData;
