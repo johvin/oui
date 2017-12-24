@@ -49,18 +49,19 @@ readOuiMetaFromDB(ouiUrl, ouiDownloadPath)
   .then(updateOuiData)
   .then(logger('finished update!'))
   .then(({ totalRows, affectedRows, changedRows }) => {
-    const end = process.hrtime();
-    const time = end[0] - start[0] + ((end[1] - start[1]) / 1e9).toFixed(2);
+    const duration = process.hrtime(start);
+    const time = (duration[0] + (duration[1] / 1e9)).toFixed(2);
 
     if (totalRows === 0) {
       console.log(`\nFinished updating oui file within ${time} seconds, nothing change!\n`);
       return;
     } else {
       console.log(`\nFinished updating oui file within ${time} seconds!\n`);
-      console.log(`total: ${totalRows}, new: ${changedRows * 2 - affectedRows}, update: ${affectedRows - changedRows}`)
+      console.log(`total: ${totalRows}, new: ${affectedRows - changedRows * 2}, update: ${changedRows}`)
     }
   })
   .catch((err) => {
     console.log('\nerror occurs => ', err.message);
     console.log(err.stack);
+    process.exit(1);
   });
