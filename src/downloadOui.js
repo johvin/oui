@@ -1,6 +1,13 @@
 const http = require('http');
 const fs = require('fs');
+const path = require('path');
 const url = require('url');
+const {
+  calcHumanReadableSpeed,
+  calcHumanReadableSize,
+  calcProgressStringBar
+} = require('./utils');
+const execSync = require('child_process').execSync;
 
 /**
  * 下载 oui 文件内容
@@ -11,6 +18,18 @@ const downloadOui = (ouiInfo, cb) => {
   if (!('url' in ouiInfo) || typeof ouiInfo.url !== 'string') {
     cb(new Error('oui url is required!'));
     return;
+  }
+
+  const downloadPath = ouiInfo.ouiFile;
+  const downloadDir = path.dirname(downloadPath);
+
+  if (!fs.existsSync(downloadDir)) {
+    try {
+      execSync(`mkdir -p ${downloadDir}`);
+    } catch (err) {
+      cb(new Error(`can't create oui download directory: ${downloadPath}`));
+      return;
+    }
   }
 
   const ouiUrl = url.parse(ouiInfo.url);
@@ -34,13 +53,37 @@ const downloadOui = (ouiInfo, cb) => {
     headers: headers
   }, (res) => {
     if (res.statusCode === 304) {
-      cb(null, false);
+      cb(null, false, res.headers);
     } else if (res.statusCode === 200) {
-      const ws = fs.createWriteStream(ouiInfo.ouiFile);
-      res.setEncoding('utf8');
-      res.pipe(ws)
+      const ws = fs.createWriteStream(downloadPath);
+
+      const totalSize = parseInt(res.headers['content-length'] || 0, 10);
+      const hrTotalSize = calcHumanReadableSize(totalSize);
+      const totalSizeStr = `${hrTotalSize[0].toFixed(2)}${hrTotalSize[1]}`;
+      let currentSize = 0;
+      let start = process.hrtime();
+
+      console.log(''); // 输出空行
+
+      res.setEncoding('utf8')
+      .on('data', (chunk) => {
+        currentSize += chunk.length;
+
+        const speed = calcHumanReadableSpeed(chunk.length, start, start = process.hrtime());
+        const speedStr = `${speed[0].toFixed(2)}${speed[1]}`;
+        const hrCurrentSize = calcHumanReadableSize(currentSize);
+        const currentSizeStr = `${hrCurrentSize[0].toFixed(2)}${hrCurrentSize[1]}`;
+        const percent = (currentSize * 100 / totalSize).toFixed(2);
+        
+        process.stdout.cursorTo(0);
+        process.stdout.clearLine(0);
+        process.stdout.write(`downloading (total: ${totalSizeStr}), ${calcProgressStringBar(percent, 40)} ${percent}% / ${currentSizeStr} / ${speedStr} ...`);
+      })
+      .on('end', () => {
+        console.log('');
+      })
+      .pipe(ws)
       .on('finish', () => {
-        console.log('ws finish');
         process.nextTick(cb, null, true, res.headers);
       })
       .on('error', cb);
