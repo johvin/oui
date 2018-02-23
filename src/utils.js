@@ -62,3 +62,19 @@ exports.calcProgressStringBar = (percent, length) => {
 
   return `[${'='.repeat(cur)}${' '.repeat(length - cur)}]`;
 }
+
+function longestString(strArr) {
+  return Math.max(...strArr.map(str => str.length));
+}
+
+// 对齐 object 的 keys，以便于输出
+exports.padObjectKeys = (obj) => {
+  const keys = Object.keys(obj);
+  const maxLength = longestString(keys);
+
+  const arr = [];
+  keys.forEach((key) => {
+    arr.push(`${key}${' '.repeat(maxLength - key.length)} : ${obj[key]}`);
+  });
+  return arr;
+}

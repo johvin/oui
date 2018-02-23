@@ -61,7 +61,9 @@ const downloadOui = (ouiInfo, cb) => {
       const hrTotalSize = calcHumanReadableSize(totalSize);
       const totalSizeStr = `${hrTotalSize[0].toFixed(2)}${hrTotalSize[1]}`;
       let currentSize = 0;
-      let start = process.hrtime();
+
+      const start = process.hrtime();
+      let prevStart = start;
 
       console.log(''); // 输出空行
 
@@ -69,18 +71,24 @@ const downloadOui = (ouiInfo, cb) => {
       .on('data', (chunk) => {
         currentSize += chunk.length;
 
-        const speed = calcHumanReadableSpeed(chunk.length, start, start = process.hrtime());
+        const speed = calcHumanReadableSpeed(chunk.length, prevStart, prevStart = process.hrtime());
         const speedStr = `${speed[0].toFixed(2)}${speed[1]}`;
         const hrCurrentSize = calcHumanReadableSize(currentSize);
         const currentSizeStr = `${hrCurrentSize[0].toFixed(2)}${hrCurrentSize[1]}`;
         const percent = (currentSize * 100 / totalSize).toFixed(2);
-        
+
         process.stdout.cursorTo(0);
         process.stdout.clearLine(0);
         process.stdout.write(`downloading (total: ${totalSizeStr}), ${calcProgressStringBar(percent, 40)} ${percent}% / ${currentSizeStr} / ${speedStr} ...`);
       })
       .on('end', () => {
-        console.log('');
+        const speed = calcHumanReadableSpeed(totalSize, start, process.hrtime());
+        const speedStr = `${speed[0].toFixed(2)}${speed[1]}`;
+        const percent = (currentSize * 100 / totalSize).toFixed(2);
+
+        process.stdout.cursorTo(0);
+        process.stdout.clearLine(0);
+        process.stdout.write(`download done! total: ${totalSizeStr}, average speed: ${speedStr}\n\n`);
       })
       .pipe(ws)
       .on('finish', () => {

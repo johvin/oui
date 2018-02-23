@@ -14,8 +14,8 @@ const updateOuiData = ({ etag, lastModified, contentLength, recordList}) => {
   }
 
   const sqlValues = recordList.map((record, index) => {
-    const { mac, org: { name, addr } } = record;
-    const str = '(' + [mac, name, addr.street, addr.provinceCity, addr.country].map(it => mysql.escape(it)).join(', ') + ')';
+    const { mal, org: { name, addr } } = record;
+    const str = '(' + [mal, name, addr.street, addr.provinceCity, addr.country].map(it => mysql.escape(it)).join(', ') + ')';
     return str;
   }).join(', ');
 
@@ -28,10 +28,10 @@ const updateOuiData = ({ etag, lastModified, contentLength, recordList}) => {
   const commitPromise = promisify(conn.commit, { context: conn });
 
   return beginTransactionPromise()
+    .then(() => queryPromise(infoSql))
     .then(() => queryPromise(dataSql))
     .then((ret) => {
-      return queryPromise(infoSql)
-        .then(() => commitPromise())
+      return commitPromise()
         .then(() => {
           conn.end();
           return {
@@ -39,7 +39,7 @@ const updateOuiData = ({ etag, lastModified, contentLength, recordList}) => {
             affectedRows: ret.affectedRows,
             changedRows: ret.changedRows
           };
-        })
+        });
     });
 };
 

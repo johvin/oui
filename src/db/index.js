@@ -1,6 +1,14 @@
 const mysql = require('mysql');
-const conf = require('./conf');
+const defaultConf = require('./conf');
 
-const getConnection = () => mysql.createConnection(conf);
+let globalDBConf = defaultConf;
 
+const getConnection = (conf = globalDBConf) => mysql.createConnection(conf);
+
+// set database connection configuration
+exports.setDBConf = (conf) => {
+  globalDBConf = conf;
+};
+
+// get database connection
 exports.getConnection = getConnection;

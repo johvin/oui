@@ -21,7 +21,7 @@ module.exports = function readOuiDataFromFile(ouiStream) {
       if (line.indexOf('(hex)') === 11) {
         innerLine = 1;
         record = {
-          mac: line.slice(0, 8).replace(/-/g, ''),
+          mal: line.slice(0, 8).replace(/-/g, ''),
           org: {
             name: line.slice(18),
             addr: {}
@@ -37,7 +37,7 @@ module.exports = function readOuiDataFromFile(ouiStream) {
           innerLine = 0;
         }
       }
-    } else if (innerLine === 1 && line.startsWith(record.mac)) {
+    } else if (innerLine === 1 && line.startsWith(record.mal)) {
       innerLine = 2;
     } else if (innerLine === 2) {
       innerLine = 3;
